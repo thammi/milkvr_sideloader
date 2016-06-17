@@ -1,0 +1,30 @@
+%html
+  %head
+    %title Template Management
+  %body
+    %h1 Milk VR Sideloader
+
+    - for [path, node], i in @files
+      %h2= path
+
+      - print_node = (node, path) ->
+        %li
+          = node.name
+
+          - if node.children?
+            - archive = '/archive' + path
+            %a(href=archive)
+              archive
+            %ul
+              - for name, child of node.children
+                - print_node(child, path + '/' + name)
+          - else
+            - mvrl = '/mvrl' + path
+            %a(href=mvrl)
+              mvrl
+
+      - if node?
+        %ul
+          - print_node(node, '/' + i)
+      - else
+        No files found

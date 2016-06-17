@@ -1,0 +1,26 @@
+{
+  "name": "milkvr_sideloader",
+  "version": "1.0.0",
+  "description": "Milk VR video sideloader",
+  "main": "src/main.coffee",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:thammi/milkvr_sideloader.git"
+  },
+  "author": "Stephan Thamm",
+  "license": "AGPL v3",
+  "bugs": {
+    "url": "https://github.com/thammi/milkvr_sideloader/issues"
+  },
+  "homepage": "https://github.com/thammi/milkvr_sideloader",
+  "dependencies": {
+    "adm-zip": "^0.4.7",
+    "bluebird": "^3.4.0",
+    "content-disposition": "^0.5.1",
+    "express": "^4.14.0",
+    "haml-coffee": "^1.14.1"
+  }
+}
