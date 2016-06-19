@@ -16,23 +16,23 @@ for arg in process.argv.slice(2)
   nodes.push([fn, node])
 
 
-get_node = (path) ->
-  cur = nodes
+get_node = (coll, path) ->
+  cur = nodes[coll]?[1]
 
   for step, i in path.split('/')
-    if i == 0
-      cur = cur[step][1]
-    else
-      cur = cur.children[step]
-
     if not cur?
       return null
+
+    cur = cur.children[step]
 
   return cur
 
 
-download_url = (req, path) ->
-  return req.protocol + '://' + req.get('host') + '/download/' + path
+path_to_url_gen = (req, coll) ->
+  url_base = req.protocol + '://' + req.get('host') + '/download/' + coll
+  base_length = nodes[coll][1].path.length
+  return (path) -> return url_base + path.substr(base_length)
+
 
 
 app = express()
@@ -45,20 +45,25 @@ app.get '/', (req, res) ->
 
 # mvrl creation
 
-app.get '/mvrl/*', (req, res) ->
+app.get '/mvrl/:id/*', (req, res) ->
+  coll = req.params.id
   route = req.params[0]
-  node = get_node(route)
-  download = download_url(req, route)
-  res.send(milkvr.create_mvrl(node, download))
 
-app.get '/archive/*', (req, res) ->
+  node = get_node(coll, route)
+  path_to_url = path_to_url_gen(req, coll)
+
+  res.send(milkvr.create_mvrl(node, path_to_url))
+
+app.get '/archive/:id/*', (req, res) ->
+  coll = req.params.id
   route = req.params[0]
-  node = get_node(route)
-  download = download_url(req, route)
+
+  node = get_node(coll, route)
+  path_to_url = path_to_url_gen(req, coll)
 
   res.setHeader('Content-Disposition', contentDisposition(path.basename(node.path) + '.zip'))
 
-  res.send(milkvr.create_archive(node, download))
+  res.send(milkvr.create_archive(node, path_to_url))
 
 # download routes
 

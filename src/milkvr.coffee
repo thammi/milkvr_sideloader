@@ -1,27 +1,31 @@
 AdmZip = require('adm-zip')
 {Promise} = require('bluebird')
 
-create_mvrl = (node, path) ->
+create_mvrl = (node, path_to_url) ->
   video = node.option('video') or ''
   audio = node.option('audio') or ''
-  thumbnail = ''
 
-  return new Buffer([path, video, audio, thumbnail, ''].join('\n'))
+  thumbnail = node.option('thumbnail') or ''
+
+  if thumbnail
+    thumbnail = path_to_url(thumbnail)
+
+  return new Buffer([path_to_url(node.path), video, audio, thumbnail, ''].join('\n'))
 
 
-insert_into_archive = (zip, node, path) ->
+insert_into_archive = (zip, node, path_to_url) ->
   if node.children?
     for name, child of node.children
-      insert_into_archive(zip, child, path + '/' + name)
+      insert_into_archive(zip, child, path_to_url)
 
   else
-    zip.addFile(node.name + '.mvrl', create_mvrl(node, path))
+    zip.addFile(node.name + '.mvrl', create_mvrl(node, path_to_url))
 
 
-create_archive = (node, path) ->
+create_archive = (node, path_to_url) ->
   zip = new AdmZip()
 
-  insert_into_archive(zip, node, path)
+  insert_into_archive(zip, node, path_to_url)
 
   return zip.toBuffer()
 

@@ -1,5 +1,5 @@
 fs = require('fs')
-path = require('path')
+{basename,join} = require('path')
 require('./polyfill')
 
 extensions = [
@@ -52,7 +52,7 @@ hints = {
 class TreeNode
 
   constructor: (@path, @parent, leaf) ->
-    @name = path.basename(@path)
+    @name = basename(@path)
     @options = {}
 
     if leaf
@@ -113,6 +113,21 @@ filename_hints = (node) ->
         node.options[type] = hint
 
 
+find_thumbnail = (node) ->
+  match_bases = [
+    node.path
+    # TODO: integrate replacing extension
+    # TODO: integrate thumbnail folder ... how does it work?
+  ]
+
+  for match_base in match_bases
+    for ext in ['.jpg', '.png']
+      match = match_base + ext
+
+      if fs.existsSync(match)
+        node.options['thumbnail'] = match
+        return
+
 find_files = (fn, parent) ->
   stat = fs.statSync(fn)
 
@@ -124,7 +139,7 @@ find_files = (fn, parent) ->
     empty = true
 
     for file in fs.readdirSync(fn)
-      child = find_files(path.join(fn, file), root)
+      child = find_files(join(fn, file), root)
 
       if child?
         root.children[child.name] = child
@@ -137,7 +152,7 @@ find_files = (fn, parent) ->
 
     # read options
 
-    load_options(path.join(fn, '.mvrlhint'), root)
+    load_options(join(fn, '.mvrlhint'), root)
 
     # done
 
@@ -148,6 +163,7 @@ find_files = (fn, parent) ->
       if fn.toLowerCase().endsWith(extension)
         node = new TreeNode(fn, parent, true)
         filename_hints(node)
+        find_thumbnail(node)
         return node
 
   else
